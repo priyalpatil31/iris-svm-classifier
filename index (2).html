@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud Computing — Priyal Patil</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050b18;
+    --surface: #0d1a2e;
+    --surface2: #112240;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #7c3aed;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: rgba(0,212,255,0.15);
+    --glow: 0 0 40px rgba(0,212,255,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── ANIMATED BACKGROUND ── */
+  .bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .bg-canvas::before {
+    content: '';
+    position: absolute;
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+    top: -200px; left: -200px;
+    animation: drift1 18s ease-in-out infinite;
+  }
+  .bg-canvas::after {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%);
+    bottom: -100px; right: -100px;
+    animation: drift2 22s ease-in-out infinite;
+  }
+  @keyframes drift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(100px,80px)} }
+  @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-80px,-60px)} }
+
+  /* GRID OVERLAY */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(5,11,24,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    font-family: 'Space Mono', monospace;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+  }
+  .hero-inner { max-width: 900px; }
+
+  .badge {
+    display: inline-block;
+    padding: 0.4rem 1.2rem;
+    border: 1px solid var(--accent);
+    border-radius: 100px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 1.5rem;
+    animation: fadeDown 0.8s 0.1s ease both;
+  }
+  .hero h1 span.grad {
+    background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    animation: fadeDown 0.8s 0.2s ease both;
+  }
+
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    animation: fadeDown 0.8s 0.3s ease both;
+  }
+  .meta-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.8rem;
+    text-align: left;
+  }
+  .meta-card .label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .meta-card .value {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent);
+  }
+
+  /* FLOATING CLOUDS */
+  .cloud-float {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.07;
+    animation: floatCloud linear infinite;
+  }
+  @keyframes floatCloud {
+    0% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  /* ── SECTION BASE ── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 6rem 2rem;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .section-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+  .section-title em {
+    font-style: italic;
+    background: linear-gradient(135deg, var(--accent), #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .section-desc {
+    margin-top: 1rem;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── WHAT IS CLOUD COMPUTING ── */
+  #intro { background: var(--surface); }
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .intro-text h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: var(--text);
+  }
+  .intro-text p {
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+    font-size: 0.97rem;
+  }
+  .intro-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .service-model {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.5rem;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    transition: border-color 0.3s, transform 0.3s;
+    cursor: default;
+  }
+  .service-model:hover { border-color: var(--accent); transform: translateX(8px); }
+  .sm-icon { font-size: 1.8rem; }
+  .sm-info h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--accent);
+    margin-bottom: 0.2rem;
+  }
+  .sm-info p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── AWS SECTION ── */
+  #aws { background: var(--bg); }
+  .aws-logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  .aws-badge-big {
+    background: linear-gradient(135deg, #ff9900, #ff6600);
+    color: #000;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2.5rem;
+    padding: 0.8rem 2.5rem;
+    border-radius: 12px;
+    letter-spacing: -1px;
+    display: inline-block;
+  }
+  .aws-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.8rem;
+  }
+  .aws-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 2rem;
+    transition: all 0.4s;
+    position: relative;
+    overflow: hidden;
+  }
+  .aws-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s;
+  }
+  .aws-card:hover { transform: translateY(-6px); border-color: var(--card-accent, var(--accent)); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .aws-card:hover::before { transform: scaleX(1); }
+
+  .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .aws-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  .aws-card .subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--card-accent, var(--accent));
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .aws-card p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.75;
+    margin-bottom: 1rem;
+  }
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .feature-list li {
+    font-size: 0.82rem;
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .feature-list li::before {
+    content: '›';
+    color: var(--card-accent, var(--accent));
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+  }
+
+  /* ── CODEANYWHERE ── */
+  #codeanywhere { background: var(--surface); }
+  .ca-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  .ca-features { display: flex; flex-direction: column; gap: 1.2rem; }
+  .ca-feature {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.3rem 1.5rem;
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    transition: border-color 0.3s;
+  }
+  .ca-feature:hover { border-color: var(--accent2); }
+  .ca-feature .icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 0.2rem; }
+  .ca-feature h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+    color: var(--accent2);
+  }
+  .ca-feature p { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
+
+  /* TERMINAL MOCK */
+  .terminal {
+    background: #0a0a0a;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    overflow: hidden;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+  }
+  .terminal-bar {
+    background: #1a1a1a;
+    padding: 0.8rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c840; }
+  .terminal-title { color: #666; font-size: 0.75rem; margin-left: auto; }
+  .terminal-body { padding: 1.5rem; }
+  .line { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; line-height: 1.6; }
+  .prompt { color: #00d4ff; }
+  .cmd { color: #e2e8f0; }
+  .output { color: #64748b; margin-left: 1.5rem; margin-bottom: 0.4rem; }
+  .success { color: #28c840; margin-left: 1.5rem; margin-bottom: 0.8rem; }
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 14px;
+    background: var(--accent);
+    animation: blink 1s infinite;
+    vertical-align: middle;
+  }
+  @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+
+  /* ── VMWARE ── */
+  #vmware { background: var(--bg); }
+  .vm-hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 3rem;
+    margin-bottom: 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .vm-hero h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+  .vm-hero h3 span { color: var(--accent3); }
+  .vm-hero p { color: var(--muted); line-height: 1.8; font-size: 0.95rem; margin-bottom: 1rem; }
+
+  /* VM VISUAL */
+  .vm-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .vm-layer {
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    position: relative;
+    margin-bottom: 4px;
+  }
+  .vm-layer::after {
+    content: '▼';
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--muted);
+    font-size: 0.65rem;
+    z-index: 1;
+  }
+  .vm-layer:last-child::after { display: none; }
+
+  .vm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+  .vm-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    background: var(--surface);
+    transition: all 0.3s;
+  }
+  .vm-card:hover { border-color: var(--accent3); transform: translateY(-4px); }
+  .vm-card .icon { font-size: 2rem; margin-bottom: 0.8rem; }
+  .vm-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent3);
+    margin-bottom: 0.5rem;
+  }
+  .vm-card p { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── SKILLS LEARNED ── */
+  #skills { background: var(--surface); }
+  .skills-wall {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  .skill-pill {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.6rem 1.4rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text);
+    transition: all 0.3s;
+    cursor: default;
+  }
+  .skill-pill:hover {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    transform: scale(1.05);
+  }
+  .skill-pill.orange:hover { background: var(--accent2); border-color: var(--accent2); }
+  .skill-pill.purple:hover { background: var(--accent3); border-color: var(--accent3); }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  footer .footer-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--accent), #a78bfa, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+  }
+  footer p { color: var(--muted); font-size: 0.9rem; line-height: 1.8; }
+  footer .prn {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    margin: 1.5rem auto;
+    border-radius: 2px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .intro-grid, .ca-layout, .vm-hero { grid-template-columns: 1fr; }
+    section { padding: 4rem 1.5rem; }
+    .hero { padding: 5rem 1.5rem 3rem; }
+    .hero-meta { gap: 1rem; }
+    .meta-card { padding: 0.8rem 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+<div class="grid-bg"></div>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo">☁ CloudEd</div>
+  <ul class="nav-links">
+    <li><a href="#intro">Intro</a></li>
+    <li><a href="#aws">AWS</a></li>
+    <li><a href="#codeanywhere">CodeAnywhere</a></li>
+    <li><a href="#vmware">VMware</a></li>
+    <li><a href="#skills">Skills</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">Cloud Computing — Academic Portfolio</div>
+    <h1>Exploring the <span class="grad">Cloud</span></h1>
+    <p class="hero-sub">
+      A comprehensive journey through cloud computing concepts, Amazon Web Services, collaborative development tools, and virtualization technologies.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-card">
+        <div class="label">Student Name</div>
+        <div class="value">Priyal Patil</div>
+      </div>
+      <div class="meta-card">
+        <div class="label">PRN Number</div>
+        <div class="value">1032231183</div>
+      </div>
+      <div class="meta-card">
+        <div class="label">Subject</div>
+        <div class="value">Cloud Computing</div>
+      </div>
+      <div class="meta-card">
+        <div class="label">Program</div>
+        <div class="value">Diploma CSE — 3rd Year</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── WHAT IS CLOUD COMPUTING ── -->
+<section id="intro">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// 01 — Foundation</div>
+      <h2 class="section-title">What is <em>Cloud Computing?</em></h2>
+      <p class="section-desc">The backbone of modern digital infrastructure — delivering computing resources over the internet on demand.</p>
+    </div>
+    <div class="intro-grid">
+      <div class="intro-text reveal">
+        <h3>Computing Without Boundaries</h3>
+        <p>Cloud computing is the on-demand delivery of IT resources — including computing power, storage, databases, networking, analytics, machine learning, and more — over the internet ("the cloud"). It replaces traditional on-premise servers and infrastructure with flexible, scalable, pay-as-you-go services.</p>
+        <p>Instead of buying, owning, and maintaining physical data centers and servers, organizations can access technology services on an as-needed basis from a cloud provider like Amazon Web Services (AWS), Microsoft Azure, or Google Cloud Platform.</p>
+        <p>Key benefits include: massive cost savings, global scalability in minutes, high availability, automatic updates, and security at enterprise scale — all without managing physical hardware.</p>
+      </div>
+      <div class="intro-visual reveal">
+        <div class="service-model">
+          <div class="sm-icon">🏗️</div>
+          <div class="sm-info">
+            <h4>IaaS — Infrastructure as a Service</h4>
+            <p>Provides fundamental computing resources: virtual machines, storage, and networking. You manage the OS and above. Examples: AWS EC2, Azure VMs.</p>
+          </div>
+        </div>
+        <div class="service-model">
+          <div class="sm-icon">🛠️</div>
+          <div class="sm-info">
+            <h4>PaaS — Platform as a Service</h4>
+            <p>Provides a managed runtime environment for building and deploying applications. No server management needed. Examples: AWS Elastic Beanstalk, Heroku.</p>
+          </div>
+        </div>
+        <div class="service-model">
+          <div class="sm-icon">📦</div>
+          <div class="sm-info">
+            <h4>SaaS — Software as a Service</h4>
+            <p>Fully managed software accessible via browser. No installation or maintenance. Examples: Gmail, Salesforce, Microsoft 365.</p>
+          </div>
+        </div>
+        <div class="service-model">
+          <div class="sm-icon">☁️</div>
+          <div class="sm-info">
+            <h4>Deployment Models</h4>
+            <p>Public Cloud (shared, AWS), Private Cloud (dedicated, on-premise), Hybrid Cloud (combination of both for flexibility and compliance).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── AWS SECTION ── -->
+<section id="aws">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// 02 — Amazon Web Services</div>
+      <div class="aws-logo-row">
+        <div class="aws-badge-big">aws</div>
+      </div>
+      <h2 class="section-title">Core AWS <em>Services Learned</em></h2>
+      <p class="section-desc">Hands-on exploration of the world's most comprehensive cloud platform — from storage to identity management.</p>
+    </div>
+    <div class="aws-grid">
+
+      <!-- S3 -->
+      <div class="aws-card reveal" style="--card-accent: #ff9900;">
+        <span class="card-icon">🪣</span>
+        <h3>Amazon S3</h3>
+        <div class="subtitle">Simple Storage Service</div>
+        <p>Amazon S3 is an object storage service offering industry-leading scalability, data availability, security, and performance. It stores and retrieves any amount of data from anywhere on the web — from websites and mobile apps to enterprise applications.</p>
+        <ul class="feature-list">
+          <li>Store unlimited files as objects in "buckets"</li>
+          <li>99.999999999% (11 nines) durability guarantee</li>
+          <li>Granular access control with bucket policies</li>
+          <li>Versioning to keep multiple variants of an object</li>
+          <li>Static website hosting directly from S3</li>
+          <li>Lifecycle rules to automate data archival to Glacier</li>
+        </ul>
+      </div>
+
+      <!-- Buckets -->
+      <div class="aws-card reveal" style="--card-accent: #00d4ff;">
+        <span class="card-icon">📦</span>
+        <h3>Creating S3 Buckets</h3>
+        <div class="subtitle">Bucket Configuration & Management</div>
+        <p>Buckets are the fundamental containers in S3 for data storage. Creating and configuring them correctly is essential for organizing cloud data, controlling access, enabling encryption, and optimizing costs across AWS regions.</p>
+        <ul class="feature-list">
+          <li>Choose an AWS region closest to end users for low latency</li>
+          <li>Enable Block Public Access for private data security</li>
+          <li>Configure bucket policies using JSON IAM syntax</li>
+          <li>Enable server-side encryption (SSE-S3 or SSE-KMS)</li>
+          <li>Set up Cross-Region Replication (CRR) for redundancy</li>
+          <li>Monitor access logs and storage metrics via CloudWatch</li>
+        </ul>
+      </div>
+
+      <!-- EC2 -->
+      <div class="aws-card reveal" style="--card-accent: #ff6b35;">
+        <span class="card-icon">💻</span>
+        <h3>Amazon EC2</h3>
+        <div class="subtitle">Elastic Compute Cloud</div>
+        <p>EC2 provides resizable compute capacity in the cloud. It allows you to launch virtual machines (called instances) of any size, install any software, and run any application — all with complete control and flexibility.</p>
+        <ul class="feature-list">
+          <li>Choose from 500+ instance types (t3.micro to high-memory)</li>
+          <li>Use Amazon Machine Images (AMIs) to launch preconfigured instances</li>
+          <li>Auto Scaling groups to scale capacity automatically with demand</li>
+          <li>Elastic Load Balancing to distribute traffic across instances</li>
+          <li>Security Groups act as virtual firewalls per instance</li>
+          <li>Spot Instances for up to 90% savings on batch workloads</li>
+        </ul>
+      </div>
+
+      <!-- IAM -->
+      <div class="aws-card reveal" style="--card-accent: #a78bfa;">
+        <span class="card-icon">🔐</span>
+        <h3>AWS IAM</h3>
+        <div class="subtitle">Identity and Access Management</div>
+        <p>IAM enables you to manage access to AWS services and resources securely. Using IAM, you can create and manage AWS users, groups, roles, and permissions to control who can access what — following the principle of least privilege.</p>
+        <ul class="feature-list">
+          <li>Create IAM Users for individual AWS console/API access</li>
+          <li>Organize users into Groups with shared permission policies</li>
+          <li>Attach JSON Policies to define allowed/denied actions</li>
+          <li>Create Roles for services (EC2 accessing S3 without keys)</li>
+          <li>Enable Multi-Factor Authentication (MFA) for security</li>
+          <li>Use IAM Access Analyzer to identify over-permissive policies</li>
+        </ul>
+      </div>
+
+      <!-- VPC -->
+      <div class="aws-card reveal" style="--card-accent: #10b981;">
+        <span class="card-icon">🌐</span>
+        <h3>Amazon VPC</h3>
+        <div class="subtitle">Virtual Private Cloud</div>
+        <p>A VPC is your own logically isolated section of the AWS Cloud where you can launch AWS resources in a virtual network you define. You have complete control over your networking environment, including IP addressing, subnets, routing tables, and gateways.</p>
+        <ul class="feature-list">
+          <li>Define custom IP address ranges using CIDR notation</li>
+          <li>Create public subnets (for web servers) and private subnets (for DBs)</li>
+          <li>Internet Gateway to enable communication with the internet</li>
+          <li>NAT Gateway for private subnet outbound internet access</li>
+          <li>VPC Peering to connect two VPCs privately</li>
+          <li>Network ACLs for subnet-level traffic filtering</li>
+        </ul>
+      </div>
+
+      <!-- CloudWatch -->
+      <div class="aws-card reveal" style="--card-accent: #f59e0b;">
+        <span class="card-icon">📊</span>
+        <h3>AWS CloudWatch</h3>
+        <div class="subtitle">Monitoring & Observability</div>
+        <p>CloudWatch provides monitoring for AWS cloud resources and applications. It collects and tracks metrics, monitors log files, sets alarms, and automatically reacts to changes in your AWS resources — giving full visibility into your cloud operations.</p>
+        <ul class="feature-list">
+          <li>Collect and visualize metrics from EC2, S3, Lambda, and more</li>
+          <li>Set threshold-based alarms that trigger SNS notifications</li>
+          <li>Centralize application and system logs with Log Groups</li>
+          <li>Create custom dashboards for real-time infrastructure views</li>
+          <li>Use CloudWatch Events to trigger automated responses</li>
+          <li>Analyze logs with CloudWatch Insights using SQL-like queries</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CODEANYWHERE ── -->
+<section id="codeanywhere">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// 03 — Collaboration</div>
+      <h2 class="section-title">Cloud IDE with <em>CodeAnywhere</em></h2>
+      <p class="section-desc">Browser-based collaborative development environment — code, collaborate, and deploy from any device, anywhere.</p>
+    </div>
+    <div class="ca-layout">
+      <div class="ca-features">
+        <div class="ca-feature reveal">
+          <div class="icon">🌍</div>
+          <div>
+            <h4>Cloud-Based Development</h4>
+            <p>CodeAnywhere is a cloud IDE that lets you code directly in your browser without installing anything locally. Your development environment lives in the cloud — accessible from any laptop, tablet, or computer with an internet connection.</p>
+          </div>
+        </div>
+        <div class="ca-feature reveal">
+          <div class="icon">🤝</div>
+          <div>
+            <h4>Real-Time Collaboration</h4>
+            <p>Share your workspace with teammates or instructors for real-time pair programming. Multiple users can view and edit code simultaneously — just like Google Docs but for code, complete with a shared terminal.</p>
+          </div>
+        </div>
+        <div class="ca-feature reveal">
+          <div class="icon">🐳</div>
+          <div>
+            <h4>Containers & Dev Boxes</h4>
+            <p>Each workspace runs in an isolated Linux container. You can SSH into it, run servers, install packages, and execute code — a full development environment pre-configured with languages like Python, Node.js, PHP, and more.</p>
+          </div>
+        </div>
+        <div class="ca-feature reveal">
+          <div class="icon">🔗</div>
+          <div>
+            <h4>Git & GitHub Integration</h4>
+            <p>Clone repositories directly from GitHub, GitLab, or Bitbucket. Commit, push, pull, and branch without leaving the browser. Combine this with AWS for a complete cloud-native development workflow.</p>
+          </div>
+        </div>
+        <div class="ca-feature reveal">
+          <div class="icon">⚡</div>
+          <div>
+            <h4>Instant Preview & Deploy</h4>
+            <p>Run your web app inside the container and access it via a public preview URL. Deploy directly to services like AWS, Heroku, or DigitalOcean without manual server configuration — accelerating the dev-to-production cycle.</p>
+          </div>
+        </div>
+      </div>
+      <div class="terminal reveal">
+        <div class="terminal-bar">
+          <span class="dot r"></span>
+          <span class="dot y"></span>
+          <span class="dot g"></span>
+          <span class="terminal-title">codeanywhere — bash</span>
+        </div>
+        <div class="terminal-body">
+          <div class="line"><span class="prompt">priyal@cloud-dev:~$</span></div>
+          <div class="line"><span class="prompt">➜</span> <span class="cmd">git clone https://github.com/priyal/cloud-project.git</span></div>
+          <div class="output">Cloning into 'cloud-project'...</div>
+          <div class="output">remote: Enumerating objects: 47, done.</div>
+          <div class="success">✓ Repository cloned successfully</div>
+          <div class="line"><span class="prompt">➜</span> <span class="cmd">cd cloud-project && ls -la</span></div>
+          <div class="output">total 40</div>
+          <div class="output">drwxr-xr-x  app/ css/ index.html server.js</div>
+          <div class="line"><span class="prompt">➜</span> <span class="cmd">npm install && node server.js</span></div>
+          <div class="output">Installing dependencies...</div>
+          <div class="success">✓ Server running on port 3000</div>
+          <div class="line"><span class="prompt">➜</span> <span class="cmd">aws s3 sync ./dist s3://priyal-bucket --acl public-read</span></div>
+          <div class="output">upload: dist/index.html → s3://priyal-bucket/</div>
+          <div class="output">upload: dist/app.js → s3://priyal-bucket/</div>
+          <div class="success">✓ Deployed to AWS S3</div>
+          <div class="line"><span class="prompt">➜</span> <span class="cmd"><span class="cursor"></span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── VMWARE ── -->
+<section id="vmware">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// 04 — Virtualization</div>
+      <h2 class="section-title">Virtual Machines with <em>VMware</em></h2>
+      <p class="section-desc">The foundation of cloud computing — running multiple isolated operating systems on a single physical machine.</p>
+    </div>
+    <div class="vm-hero reveal">
+      <div>
+        <h3>What is <span>Virtualization?</span></h3>
+        <p>Virtualization is the process of creating a software-based (virtual) version of a computer, including virtual computer hardware, storage, and networking. VMware pioneered this technology and remains the industry leader in enterprise virtualization solutions.</p>
+        <p>A single physical server running VMware can host dozens of virtual machines, each behaving like a completely independent computer with its own OS, applications, and resources. This is the core technology that powers cloud data centers worldwide.</p>
+        <p>In our coursework, we used <strong>VMware Workstation</strong> to create, configure, and manage virtual machines locally — understanding the same technology that AWS EC2 uses at massive scale.</p>
+      </div>
+      <div>
+        <div class="vm-stack">
+          <div class="vm-layer" style="background: rgba(0,212,255,0.12); color: var(--accent); border: 1px solid rgba(0,212,255,0.2);">
+            Guest OS (Windows / Linux VM)
+          </div>
+          <div class="vm-layer" style="background: rgba(124,58,237,0.12); color: #a78bfa; border: 1px solid rgba(124,58,237,0.2);">
+            Virtual Hardware (vCPU, vRAM, vDisk)
+          </div>
+          <div class="vm-layer" style="background: rgba(255,107,53,0.12); color: var(--accent2); border: 1px solid rgba(255,107,53,0.2);">
+            VMware Hypervisor (Type 1 / Type 2)
+          </div>
+          <div class="vm-layer" style="background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.2);">
+            Host Operating System
+          </div>
+          <div class="vm-layer" style="background: rgba(100,116,139,0.12); color: var(--muted); border: 1px solid rgba(100,116,139,0.2);">
+            Physical Hardware (CPU, RAM, Storage, NIC)
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vm-grid">
+      <div class="vm-card reveal">
+        <div class="icon">🖥️</div>
+        <h4>Creating Virtual Machines</h4>
+        <p>Using VMware Workstation, we created VMs step-by-step: selecting ISO images, allocating vCPUs and RAM, configuring virtual hard disk size, choosing network adapter type (NAT, Bridged, Host-only), and completing OS installation.</p>
+      </div>
+      <div class="vm-card reveal">
+        <div class="icon">📸</div>
+        <h4>Snapshots & Rollback</h4>
+        <p>VMware's snapshot feature captures the entire VM state at a point in time. If an update or configuration change breaks something, you can instantly roll back to the last snapshot — similar to a system restore point but far more powerful.</p>
+      </div>
+      <div class="vm-card reveal">
+        <div class="icon">🌐</div>
+        <h4>Virtual Networking</h4>
+        <p>Configured virtual network adapters in three modes — Bridged (VM gets its own IP on LAN), NAT (VM shares host IP), and Host-Only (isolated private network). This mirrors how cloud VPCs and subnets work at scale.</p>
+      </div>
+      <div class="vm-card reveal">
+        <div class="icon">📦</div>
+        <h4>VM Templates & Cloning</h4>
+        <p>Created base VM templates with pre-installed software, then cloned them rapidly to spin up multiple identical environments. This same concept is how AWS AMIs allow instant EC2 instance creation from a master image.</p>
+      </div>
+      <div class="vm-card reveal">
+        <div class="icon">⚡</div>
+        <h4>Resource Allocation</h4>
+        <p>Learned to dynamically adjust vCPU cores, RAM, and disk space allocated to running VMs — understanding how overcommitting physical resources affects performance and how cloud providers manage multi-tenant environments.</p>
+      </div>
+      <div class="vm-card reveal">
+        <div class="icon">🔄</div>
+        <h4>Hypervisor Types</h4>
+        <p>Type 1 (Bare Metal) hypervisors like VMware ESXi run directly on hardware without a host OS — used in data centers and AWS. Type 2 (Hosted) like VMware Workstation run on top of an OS — perfect for learning and development.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SKILLS ── -->
+<section id="skills">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// 05 — Skills Acquired</div>
+      <h2 class="section-title">Everything <em>I Learned</em></h2>
+      <div class="divider"></div>
+      <p class="section-desc">A complete overview of all technologies, tools, and concepts mastered throughout the Cloud Computing subject.</p>
+    </div>
+    <div class="skills-wall reveal">
+      <span class="skill-pill">Amazon AWS</span>
+      <span class="skill-pill">Amazon S3</span>
+      <span class="skill-pill">S3 Bucket Creation</span>
+      <span class="skill-pill">Bucket Policies</span>
+      <span class="skill-pill">EC2 Instances</span>
+      <span class="skill-pill">AMI Configuration</span>
+      <span class="skill-pill">IAM Users &amp; Groups</span>
+      <span class="skill-pill">IAM Roles</span>
+      <span class="skill-pill">IAM Policies (JSON)</span>
+      <span class="skill-pill orange">CodeAnywhere IDE</span>
+      <span class="skill-pill orange">Cloud Collaboration</span>
+      <span class="skill-pill orange">Remote Development</span>
+      <span class="skill-pill orange">Git Integration</span>
+      <span class="skill-pill orange">Container Dev Environments</span>
+      <span class="skill-pill purple">VMware Workstation</span>
+      <span class="skill-pill purple">Virtual Machine Creation</span>
+      <span class="skill-pill purple">VM Snapshots</span>
+      <span class="skill-pill purple">Virtual Networking</span>
+      <span class="skill-pill purple">Hypervisor Concepts</span>
+      <span class="skill-pill">Cloud Computing Fundamentals</span>
+      <span class="skill-pill">IaaS / PaaS / SaaS</span>
+      <span class="skill-pill">Public &amp; Private Cloud</span>
+      <span class="skill-pill">VPC &amp; Subnets</span>
+      <span class="skill-pill">CloudWatch Monitoring</span>
+      <span class="skill-pill orange">AWS CLI</span>
+      <span class="skill-pill purple">Resource Allocation</span>
+      <span class="skill-pill">Cloud Security</span>
+      <span class="skill-pill">Auto Scaling</span>
+      <span class="skill-pill orange">Deployment Pipelines</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-name">Priyal Patil</div>
+  <p>Diploma in Computer Science Engineering — 3rd Year</p>
+  <p>Subject: Cloud Computing</p>
+  <div class="prn">PRN: 1032231183</div>
+  <div class="divider" style="margin-top:1.5rem;"></div>
+  <p style="margin-top:1rem; font-size:0.78rem; opacity:0.5;">Built with ☁️ and lots of AWS exploration</p>
+</footer>
+
+<script>
+  // Intersection Observer for reveal animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Staggered reveals for grids
+  document.querySelectorAll('.aws-grid .aws-card, .vm-grid .vm-card, .skills-wall .skill-pill').forEach((el, i) => {
+    el.style.transitionDelay = `${(i % 6) * 0.08}s`;
+  });
+
+  // Nav active on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--accent)' : '';
+    });
+  });
+
+  // Floating cloud particles on hero
+  const hero = document.querySelector('.hero');
+  for (let i = 0; i < 5; i++) {
+    const el = document.createElement('div');
+    el.classList.add('cloud-float');
+    const size = 80 + Math.random() * 200;
+    Object.assign(el.style, {
+      width: size + 'px',
+      height: size + 'px',
+      background: i % 2 === 0 ? 'var(--accent)' : 'var(--accent3)',
+      left: Math.random() * 100 + '%',
+      top: Math.random() * 100 + '%',
+      animationDuration: (12 + Math.random() * 10) + 's',
+      animationDelay: (Math.random() * 5) + 's'
+    });
+    hero.appendChild(el);
+  }
+</script>
+</body>
+</html>
